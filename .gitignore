@@ -1,2 +1,3 @@
 chat-web/node_modules/
-chat-web/
+target/*
+*.iml
