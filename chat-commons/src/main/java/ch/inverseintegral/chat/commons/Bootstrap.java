@@ -64,9 +64,8 @@ public final class Bootstrap {
                     .childHandler(new ServerChannelInitializer());
 
             Channel channel = serverBootstrap.bind(1337).sync().channel();
-            System.out.println("Server started");
-
             channel.closeFuture().sync();
+
         } catch (InterruptedException e) {
             e.printStackTrace();
         } finally {

@@ -1,6 +1,7 @@
 package ch.inverseintegral.chat.commons;
 
 import ch.inverseintegral.chat.commons.packets.Packet;
+import io.netty.channel.Channel;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
@@ -9,7 +10,7 @@ import java.util.*;
 
 /**
  * A Registry contains listeners to specific packets.
- * This class supports a registration and unregistration mechanism.
+ * This class supports a registration and an unregistration mechanism.
  *
  * @author Inverse Integral
  * @version 1.0
@@ -45,15 +46,16 @@ public final class Registry {
             if (listener != null) {
 
                 // A listener should have exactly one parameter.
-                if (method.getParameterCount() != 1) {
-                    throw new IllegalArgumentException("A listener method must exactly have one parameter");
+                if (method.getParameterCount() == 0 || method.getParameterCount() > 2) {
+                    throw new IllegalArgumentException("A listener method must exactly have two parameters");
                 } else {
 
                     // Get the first parameter (packet implementation).
                     Class<?> firstParameter = method.getParameterTypes()[0];
+                    Class<?> secondParameter = method.getParameterTypes()[1];
 
-                    if (!Packet.class.isAssignableFrom(firstParameter)) {
-                        throw new IllegalArgumentException("The first parameter of a listener must be a packet");
+                    if (!Packet.class.isAssignableFrom(firstParameter) || !Channel.class.isAssignableFrom(secondParameter)) {
+                        throw new IllegalArgumentException("The parameter must be of the type Packet and Channel");
                     } else {
                         Class<? extends Packet> packetParameter = (Class<? extends Packet>) firstParameter;
 
@@ -64,7 +66,6 @@ public final class Registry {
                             listeners.computeIfAbsent(packetParameter, aClass -> new HashSet<>());
                             listeners.get(packetParameter).add(methodContainer);
 
-                            System.out.println("Registered a new listener for the packet " + packetParameter.getName());
                         } catch (IllegalAccessException e) {
                             e.printStackTrace();
                         }

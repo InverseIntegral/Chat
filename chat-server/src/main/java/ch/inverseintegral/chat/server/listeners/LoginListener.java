@@ -4,6 +4,7 @@ import ch.inverseintegral.chat.commons.handlers.PacketHandler;
 import ch.inverseintegral.chat.commons.Listener;
 import ch.inverseintegral.chat.commons.packets.base.StringBasedChatMessagePacket;
 import ch.inverseintegral.chat.commons.packets.init.LoginPacket;
+import io.netty.channel.Channel;
 
 /**
  * @author Inverse Integral
@@ -13,7 +14,7 @@ import ch.inverseintegral.chat.commons.packets.init.LoginPacket;
 public class LoginListener {
 
     @Listener
-    public void onLogin(LoginPacket loginPacket) {
+    public void onLogin(LoginPacket loginPacket, Channel channel) {
         StringBasedChatMessagePacket loginMessage = new StringBasedChatMessagePacket(loginPacket.getUsername() + " connected");
         PacketHandler.broadcastPacket(loginMessage);
     }
