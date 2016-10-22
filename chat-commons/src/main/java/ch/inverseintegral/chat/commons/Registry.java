@@ -46,7 +46,7 @@ public final class Registry {
 
                 // A listener should have exactly one parameter.
                 if (method.getParameterCount() != 1) {
-                    throw new IllegalArgumentException("A listener method must exactly one parameter");
+                    throw new IllegalArgumentException("A listener method must exactly have one parameter");
                 } else {
 
                     // Get the first parameter (packet implementation).

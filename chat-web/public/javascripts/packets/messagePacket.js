@@ -1,4 +1,4 @@
-define(["protocolUtil"], function (protocolUtil) {
+define(["../protocolUtil"], function (protocolUtil) {
 
     return {
         read: function (dataView, callback) {

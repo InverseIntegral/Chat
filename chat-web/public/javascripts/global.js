@@ -6,10 +6,28 @@ require(["protocol"], function (protocol) {
 
     socket.onopen = function () {
         var element = document.getElementById("chat-input");
+        var label = document.getElementById("chat-label");
+        element.disabled = false;
+
+        var initialized = false;
 
         // Add the on key press listener
         element.onkeypress = function (e) {
             if (e.keyCode == 13) {
+
+                if (!initialized) {
+
+                    var login = protocol.getPacketById(0);
+                    login.write(element.value, function (dataView) {
+                        element.value = '';
+                        label.innerHTML = 'Message';
+
+                        socket.send(dataView);
+                        initialized = true;
+                    });
+
+                    return;
+                }
 
                 // Create a new packet
                 var packet = protocol.getPacketById(1);
@@ -35,8 +53,12 @@ require(["protocol"], function (protocol) {
         packet.read(dataView, function (message) {
             // Print the message to the dom
             var chat = document.getElementById("chat");
-            chat.innerHTML += "<p>" + message + "</p>";
+            chat.innerHTML += "<p>> " + message + "</p>";
         });
     };
+
+    socket.onerror = function (error) {
+        Materialize.toast('Unable to contact the server', 4000);
+    }
 
 });

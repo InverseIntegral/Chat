@@ -14,7 +14,8 @@ public class LoginListener {
 
     @Listener
     public void onLogin(LoginPacket loginPacket) {
-        PacketHandler.broadcastPacket(new StringBasedChatMessagePacket(loginPacket.getUsername() + " connected"));
+        StringBasedChatMessagePacket loginMessage = new StringBasedChatMessagePacket(loginPacket.getUsername() + " connected");
+        PacketHandler.broadcastPacket(loginMessage);
     }
 
 }

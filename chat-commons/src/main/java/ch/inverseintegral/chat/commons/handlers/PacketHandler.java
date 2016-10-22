@@ -6,6 +6,7 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.group.ChannelGroup;
+import io.netty.channel.group.ChannelMatcher;
 import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.util.concurrent.GlobalEventExecutor;
 
@@ -68,8 +69,23 @@ public class PacketHandler extends SimpleChannelInboundHandler<Packet> {
         }
     }
 
+    /**
+     * Broadcasts a packet to all channels.
+     *
+     * @param packet    The packet that is broadcasted.
+     */
     public static void broadcastPacket(Packet packet) {
         channels.writeAndFlush(packet);
+    }
+
+    /**
+     * Broadcasts a packet to all matched channels.
+     *
+     * @param packet    The packet that is broadcasted.
+     * @param matcher   The channel matcher.
+     */
+    public static void broadcastPacket(Packet packet, ChannelMatcher matcher) {
+        channels.writeAndFlush(packet, matcher);
     }
 
 }

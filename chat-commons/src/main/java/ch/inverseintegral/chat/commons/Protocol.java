@@ -21,7 +21,6 @@ public enum Protocol {
 
     LOGIN(0, LoginPacket.class),
     STRING_MESSAGE(1, StringBasedChatMessagePacket.class);
-    /*TEA_POT(256, Teapot.class); Currently disabled */
 
     /**
      * A map of ids and packets.

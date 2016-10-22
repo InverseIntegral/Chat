@@ -16,6 +16,8 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.net.URI;
+import java.util.NoSuchElementException;
+import java.util.Scanner;
 
 /**
  * A WebSocketClient initializes the connection to a websocket.
@@ -41,18 +43,24 @@ public class WebSocketClient {
 
         // Client bootstrap...
         Channel channel = Bootstrap.client(uri, handler);
-        System.out.println("Connected to the server");
+        System.out.println("Enter your username: ");
 
-        PacketHandler.sendPacket(new LoginPacket(InetAddress.getLocalHost().getHostAddress()), channel);
-        BufferedReader console = new BufferedReader(new InputStreamReader(System.in));
+        try (Scanner scanner = new Scanner(System.in)) {
 
-        while (true) {
-            String msg = console.readLine();
-            if (msg == null) {
-                break;
-            } else {
-                PacketHandler.sendPacket(new StringBasedChatMessagePacket(msg), channel);
+            String username = scanner.nextLine();
+            PacketHandler.sendPacket(new LoginPacket(username), channel);
+
+            while (true) {
+
+                try {
+                    String msg = scanner.nextLine();
+                    PacketHandler.sendPacket(new StringBasedChatMessagePacket(msg), channel);
+                } catch (NoSuchElementException | IllegalStateException e) {
+                    break;
+                }
+
             }
+
         }
     }
 
