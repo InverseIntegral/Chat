@@ -1,4 +1,4 @@
-package ch.inverseintegral.chat.commons;
+package ch.inverseintegral.chat.commons.listeners;
 
 import ch.inverseintegral.chat.commons.packets.Packet;
 
@@ -9,9 +9,8 @@ import java.lang.annotation.Target;
 
 /**
  * A Listener listens on a packet received event.
- * A method that is annotated with {@code @Listener} must have exactly two parameter.
- * The first parameter must be a subclass of {@link Packet packet} and
- * the second Parameter is a {@link io.netty.channel.Channel channel}.
+ * A method that is annotated with {@code @Listener} must have exactly one parameter.
+ * The  parameter must be a subclass of {@link Packet packet}.
  *
  * @author Inverse Integral
  * @version 1.0

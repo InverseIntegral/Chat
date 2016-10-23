@@ -1,6 +1,9 @@
 define(["../protocolUtil"], function (protocolUtil) {
 
     return {
+
+        id: 1,
+
         read: function (dataView, callback) {
             // reads the string after the packet id
             protocolUtil.readString(dataView, 4, callback);

@@ -1,5 +1,6 @@
 package ch.inverseintegral.chat.client;
 
+import ch.inverseintegral.chat.client.listeners.LoginListener;
 import ch.inverseintegral.chat.client.listeners.StringBasedChatMessageListener;
 import ch.inverseintegral.chat.commons.Bootstrap;
 import ch.inverseintegral.chat.commons.Registry;
@@ -27,10 +28,11 @@ public class WebSocketClient {
 
     public static void main(String[] args) throws Exception {
 
-        // Register listeners.
+        // Register listeners
         Registry.registerListener(new StringBasedChatMessageListener());
+        Registry.registerListener(new LoginListener());
 
-        // Create the handshaker abstraction and the uri.
+        // Create the handshaker abstraction and the uri
         URI uri = new URI("ws://127.0.0.1:1337/websocket");
         final WebSocketHandshakeHandler handler = new WebSocketHandshakeHandler(WebSocketClientHandshakerFactory.newHandshaker(uri,
                 WebSocketVersion.V13,

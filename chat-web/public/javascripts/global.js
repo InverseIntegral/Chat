@@ -50,15 +50,33 @@ require(["protocol"], function (protocol) {
         // Get the received packet
         var packet = protocol.getPacket(dataView);
 
-        packet.read(dataView, function (message) {
-            // Print the message to the dom
-            var chat = document.getElementById("chat");
-            chat.innerHTML += "<p>> " + message + "</p>";
-        });
+        switch (packet.id) {
+            case 0:
+                packet.read(dataView, newLogin);
+                break;
+            case 1:
+                packet.read(dataView, newMessage);
+                break;
+            default:
+                throw "Unknown packet with id " + packet.id + " detected";
+        }
     };
 
-    socket.onerror = function (error) {
+    socket.onerror = function () {
         Materialize.toast('Unable to contact the server', 4000);
     }
 
 });
+
+newLogin = function (username) {
+    addText("<p>> " + username + " connected</p>");
+};
+
+newMessage = function (message) {
+    addText("<p>> " + message + "</p>");
+};
+
+addText = function (text) {
+    var chat = document.getElementById("chat");
+    chat.innerHTML += text;
+};

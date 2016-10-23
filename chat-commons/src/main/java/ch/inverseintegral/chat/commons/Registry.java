@@ -1,5 +1,7 @@
 package ch.inverseintegral.chat.commons;
 
+import ch.inverseintegral.chat.commons.listeners.ChannelListener;
+import ch.inverseintegral.chat.commons.listeners.Listener;
 import ch.inverseintegral.chat.commons.packets.Packet;
 import io.netty.channel.Channel;
 
@@ -16,6 +18,7 @@ import java.util.*;
  * @version 1.0
  * @since 1.0
  * @see Listener
+ * @see ChannelListener
  */
 public final class Registry {
 
@@ -32,53 +35,74 @@ public final class Registry {
     /**
      * Registers new listener to the context.
      *
-     * @param invoker The object that contains {@link Listener listener} annotated methods.
+     * @param invoker The object that contains {@link Listener listener} or
+     *                {@link ChannelListener channel listener}annotated methods.
      */
     public static void registerListener(Object invoker) {
-
         // Get all methods from this class.
         List<Method> methods = Arrays.asList(invoker.getClass().getDeclaredMethods());
 
         for (Method method : methods) {
 
-            // Get the annotation instance to check if there is an annotation present.
             Listener listener = method.getAnnotation(Listener.class);
+            ChannelListener channelListener = method.getAnnotation(ChannelListener.class);
+
             if (listener != null) {
-
-                // A listener should have exactly one parameter.
-                if (method.getParameterCount() == 0 || method.getParameterCount() > 2) {
-                    throw new IllegalArgumentException("A listener method must exactly have two parameters");
-                } else {
-
-                    // Get the first parameter (packet implementation).
-                    Class<?> firstParameter = method.getParameterTypes()[0];
-                    Class<?> secondParameter = method.getParameterTypes()[1];
-
-                    if (!Packet.class.isAssignableFrom(firstParameter) || !Channel.class.isAssignableFrom(secondParameter)) {
-                        throw new IllegalArgumentException("The parameter must be of the type Packet and Channel");
-                    } else {
-                        Class<? extends Packet> packetParameter = (Class<? extends Packet>) firstParameter;
-
-                        try {
-                            MethodContainer methodContainer = new MethodContainer(invoker, lookup.unreflect(method));
-
-                            // Create a new set if there is none present. Add the new method container to the set.
-                            listeners.computeIfAbsent(packetParameter, aClass -> new HashSet<>());
-                            listeners.get(packetParameter).add(methodContainer);
-
-                        } catch (IllegalAccessException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
+                registerListener(invoker, method);
+            } else if (channelListener != null) {
+                registerChannelListener(invoker, method);
             }
+        }
+    }
+
+    private static void registerListener(Object invoker, Method method) {
+        if (method.getParameterCount() != 1) {
+            throw new IllegalArgumentException("A listener method must have one parameter");
+        } else {
+            Class<?> firstParameter = method.getParameterTypes()[0];
+
+            if (!Packet.class.isAssignableFrom(firstParameter)) {
+                throw new IllegalArgumentException("The parameter must be of the type Packet");
+            } else {
+                Class<? extends Packet> packetParameter = (Class<? extends Packet>) firstParameter;
+                addMethodContainer(packetParameter, invoker, method, false);
+            }
+        }
+    }
+
+    private static void registerChannelListener(Object invoker, Method method) {
+        if (method.getParameterCount() != 2) {
+            throw new IllegalArgumentException("A channel listener method must have two parameter");
+        } else {
+            Class<?> firstParameter = method.getParameterTypes()[0];
+            Class<?> secondParameter = method.getParameterTypes()[1];
+
+            if (!Packet.class.isAssignableFrom(firstParameter) || !Channel.class.isAssignableFrom(secondParameter)) {
+                throw new IllegalArgumentException("The parameters must be of the type Packet and Channel");
+            } else {
+                Class<? extends Packet> packetParameter = (Class<? extends Packet>) firstParameter;
+                addMethodContainer(packetParameter, invoker, method, true);
+            }
+        }
+    }
+
+    private static void addMethodContainer(Class<? extends Packet> packetClass, Object invoker, Method method, boolean channelListener) {
+        try {
+            MethodContainer methodContainer = new MethodContainer(invoker, lookup.unreflect(method), channelListener);
+
+            // Create a new set if there is none present. Add the new method container to the set.
+            listeners.computeIfAbsent(packetClass, aClass -> new HashSet<>());
+            listeners.get(packetClass).add(methodContainer);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
         }
     }
 
     /**
      * Unregisters all listeners that the given object contains.
      *
-     * @param invoker The object that contains {@link Listener listener} annotated methods.
+     * @param invoker The object that contains {@link Listener listener}
+     *                or {@link ChannelListener channel listener} annotated methods.
      */
     public static void unregisterListener(Object invoker) {
         for (Map.Entry<Class<? extends Packet>, Set<MethodContainer>> classSetEntry : listeners.entrySet()) {
@@ -86,10 +110,7 @@ public final class Registry {
             // Match on the invoker object and remove the specific method container.
             classSetEntry.getValue().stream()
                     .filter(methodContainer -> methodContainer.getInvoker().equals(invoker))
-                    .forEach(methodContainer -> {
-                        listeners.get(classSetEntry.getKey()).remove(methodContainer);
-                        System.out.println("Unregistered a listener for the packet " + classSetEntry.getKey().getName());
-                    });
+                    .forEach(methodContainer -> listeners.get(classSetEntry.getKey()).remove(methodContainer));
         }
     }
 
@@ -104,18 +125,25 @@ public final class Registry {
     }
 
     /**
-     * This class contains an invoker and a method handle.
-     * These attributes can be used to invoke a method on a specific objects.
-     * In this case it is used for listener methods.
+     * This class contains an invoker, a method handle and a boolean flag.
+     * These attributes can be used to invoke a method on a specific object.
+     * The flag indicated whether this method is a channel listener or a
+     * normal listener.
+     *
+     * @author Inverse Integral
+     * @version 1.0
+     * @since 1.0
      */
     public static final class MethodContainer {
 
         private final Object invoker;
         private final MethodHandle methodHandle;
+        private final boolean channelListener;
 
-        public MethodContainer(final Object invoker, final MethodHandle methodHandle) {
+        MethodContainer(final Object invoker, final MethodHandle methodHandle, final boolean channelListener) {
             this.invoker = invoker;
             this.methodHandle = methodHandle;
+            this.channelListener = channelListener;
         }
 
         public Object getInvoker() {
@@ -126,6 +154,30 @@ public final class Registry {
             return methodHandle;
         }
 
+        public boolean isChannelListener() {
+            return channelListener;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            MethodContainer that = (MethodContainer) o;
+
+            return channelListener == that.channelListener &&
+                    invoker.equals(that.invoker) &&
+                    methodHandle.equals(that.methodHandle);
+
+        }
+
+        @Override
+        public int hashCode() {
+            int result = invoker.hashCode();
+            result = 31 * result + methodHandle.hashCode();
+            result = 31 * result + (channelListener ? 1 : 0);
+            return result;
+        }
     }
 
 }

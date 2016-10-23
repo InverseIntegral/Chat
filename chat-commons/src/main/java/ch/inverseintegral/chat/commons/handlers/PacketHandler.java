@@ -32,10 +32,14 @@ public class PacketHandler extends SimpleChannelInboundHandler<Packet> {
         Set<Registry.MethodContainer> methodContainers = Registry.getListeners(packetClass);
 
         if (methodContainers != null) {
-            // Call all the method handles using the invoker object, the received packet and the channel.
+            // Call all the method handles that listen on this packet
             for (Registry.MethodContainer methodContainer : Registry.getListeners(packetClass)) {
                 try {
-                    methodContainer.getMethodHandle().invoke(methodContainer.getInvoker(), packet, ctx.channel());
+                    if (methodContainer.isChannelListener()) {
+                        methodContainer.getMethodHandle().invoke(methodContainer.getInvoker(), packet, ctx.channel());
+                    } else {
+                        methodContainer.getMethodHandle().invoke(methodContainer.getInvoker(), packet);
+                    }
                 } catch (Throwable throwable) {
                     throwable.printStackTrace();
                 }

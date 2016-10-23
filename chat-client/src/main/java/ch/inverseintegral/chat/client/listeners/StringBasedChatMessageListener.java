@@ -1,6 +1,6 @@
 package ch.inverseintegral.chat.client.listeners;
 
-import ch.inverseintegral.chat.commons.Listener;
+import ch.inverseintegral.chat.commons.listeners.Listener;
 import ch.inverseintegral.chat.commons.packets.base.StringBasedChatMessagePacket;
 import io.netty.channel.Channel;
 
@@ -12,7 +12,7 @@ import io.netty.channel.Channel;
 public class StringBasedChatMessageListener {
 
     @Listener
-    public void onStringMessage(StringBasedChatMessagePacket packet, Channel channel) {
+    public void onStringMessage(StringBasedChatMessagePacket packet) {
         System.out.println(packet.getMessage());
     }
 

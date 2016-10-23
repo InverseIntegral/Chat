@@ -1,4 +1,7 @@
 define({
+
+    id: undefined,
+
     read: function () {
         throw "Not implemented";
     },

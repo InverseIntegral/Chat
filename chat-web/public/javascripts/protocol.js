@@ -1,9 +1,11 @@
 define(["packets/messagePacket", "packets/loginPacket"], function (messagePacket, loginPacket) {
 
-    // protocol array contains all packets (used for de/serialization)
+    var packets = [messagePacket, loginPacket];
     var protocol = {};
-    protocol[0] = loginPacket;
-    protocol[1] = messagePacket;
+
+    packets.forEach(function(e) {
+       protocol[e.id] = e;
+    });
 
     return {
         /**

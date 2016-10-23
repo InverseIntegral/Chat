@@ -74,7 +74,7 @@ public final class Bootstrap {
         }
     }
 
-    static class ClientChannelInitializer extends ChannelInitializer<SocketChannel> {
+    private static final class ClientChannelInitializer extends ChannelInitializer<SocketChannel> {
 
         private WebSocketHandshakeHandler handshakeHandler;
 
@@ -90,7 +90,7 @@ public final class Bootstrap {
         }
     }
 
-    static class ServerChannelInitializer extends ChannelInitializer<SocketChannel> {
+    private static final class ServerChannelInitializer extends ChannelInitializer<SocketChannel> {
 
         private static final String WEBSOCKET_PATH = "/websocket";
 

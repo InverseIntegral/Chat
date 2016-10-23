@@ -15,8 +15,8 @@ import ch.inverseintegral.chat.server.listeners.StringBasedChatMessageListener;
 public class WebSocketServer {
 
     public static void main(String[] args) {
-        Registry.registerListener(new LoginListener());
         Registry.registerListener(new StringBasedChatMessageListener());
+        Registry.registerListener(new LoginListener());
 
         Bootstrap.server();
     }
