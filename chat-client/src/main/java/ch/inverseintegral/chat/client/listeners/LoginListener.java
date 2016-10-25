@@ -6,7 +6,7 @@ import ch.inverseintegral.chat.commons.packets.init.LoginPacket;
 /**
  * @author Inverse Integral
  * @version 1.0
- * @since 0.2.0
+ * @since 1.0
  */
 public class LoginListener {
 

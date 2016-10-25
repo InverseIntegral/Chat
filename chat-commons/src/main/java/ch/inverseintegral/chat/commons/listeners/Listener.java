@@ -10,7 +10,7 @@ import java.lang.annotation.Target;
 /**
  * A Listener listens on a packet received event.
  * A method that is annotated with {@code @Listener} must have exactly one parameter.
- * The  parameter must be a subclass of {@link Packet packet}.
+ * The parameter must be a subclass of {@link Packet packet}.
  *
  * @author Inverse Integral
  * @version 1.0

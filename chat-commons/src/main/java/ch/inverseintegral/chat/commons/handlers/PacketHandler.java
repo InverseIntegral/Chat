@@ -3,6 +3,7 @@ package ch.inverseintegral.chat.commons.handlers;
 import ch.inverseintegral.chat.commons.Registry;
 import ch.inverseintegral.chat.commons.packets.Packet;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.group.ChannelGroup;
@@ -63,10 +64,11 @@ public class PacketHandler extends SimpleChannelInboundHandler<Packet> {
      *
      * @param packet The packet that should be sent to the given channel.
      * @param channel The channel that will receive the packet.
+     * @return  Returns the channel future for this write event.
      */
-    public static void sendPacket(Packet packet, Channel channel) {
+    public static ChannelFuture sendPacket(Packet packet, Channel channel) {
         if (channel.isOpen() && channel.isWritable()) {
-            channel.writeAndFlush(packet);
+            return channel.writeAndFlush(packet);
         } else {
             throw new IllegalArgumentException("Unable to access the given channel");
         }

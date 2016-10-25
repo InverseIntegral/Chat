@@ -8,7 +8,7 @@ import java.util.Map;
 /**
  * @author Inverse Integral
  * @version 1.0
- * @since 0.2.0
+ * @since 1.0
  */
 public final class UserContainer {
 

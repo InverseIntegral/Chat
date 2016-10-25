@@ -16,6 +16,11 @@ public class LoginListener {
 
     @ChannelListener
     public void onLogin(LoginPacket loginPacket, Channel channel) {
+        if (UserContainer.containsChannel(channel)) {
+            channel.close();
+            return;
+        }
+
         UserContainer.addUsername(loginPacket.getUsername(), channel);
         PacketHandler.broadcastPacket(loginPacket, ChannelMatchers.isNot(channel));
     }
